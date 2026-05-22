@@ -313,7 +313,7 @@ void processCommand(const std::string& command_line) {
     tokens.push_back(token);
   }
 
-  if (command == "graphs") {
+  if (command == "graphs" || command == "graph") {
     handleGraphs();
   } else if (command == "vertexes") {
     handleVertexes(tokens);
