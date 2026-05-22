@@ -1,9 +1,11 @@
 #ifndef BSTREE_HPP
 #define BSTREE_HPP
 
-#include <iostream>
-#include <string>
 #include <functional>
+#include <string>
+#include <utility>
+
+namespace petrenko {
 
 template<class Key, class Value>
 class BSTIterator;
@@ -13,28 +15,25 @@ class BSTConstIterator;
 
 template<class Key, class Value>
 struct BSTNode {
-  Key key;
-  Value value;
-  BSTNode<Key, Value>* left;
-  BSTNode<Key, Value>* right;
-  BSTNode<Key, Value>* parent;
+  Key key_;
+  Value value_;
+  BSTNode<Key, Value>* left_;
+  BSTNode<Key, Value>* right_;
+  BSTNode<Key, Value>* parent_;
 
   BSTNode(const Key& k, const Value& v)
-    : key(k), value(v), left(nullptr), right(nullptr), parent(nullptr) {}
+    : key_(k), value_(v), left_(nullptr), right_(nullptr), parent_(nullptr)
+  {
+  }
 };
 
 template<class Key, class Value>
 class BSTIterator {
-private:
-  BSTNode<Key, Value>* node;
-
 public:
   BSTIterator();
-  explicit BSTIterator(BSTNode<Key, Value>* n);
+  explicit BSTIterator(BSTNode<Key, Value>* node);
 
   std::pair<const Key&, Value&> operator*() const;
-  std::pair<const Key&, Value&> operator*();
-
   BSTIterator& operator++();
   BSTIterator operator++(int);
 
@@ -42,20 +41,19 @@ public:
   bool operator!=(const BSTIterator& other) const;
 
   BSTNode<Key, Value>* getNode() const;
+
+private:
+  BSTNode<Key, Value>* node_;
 };
 
 template<class Key, class Value>
 class BSTConstIterator {
-private:
-  const BSTNode<Key, Value>* node;
-
 public:
   BSTConstIterator();
-  explicit BSTConstIterator(const BSTNode<Key, Value>* n);
+  explicit BSTConstIterator(const BSTNode<Key, Value>* node);
   explicit BSTConstIterator(const BSTIterator<Key, Value>& it);
 
   std::pair<const Key&, const Value&> operator*() const;
-
   BSTConstIterator& operator++();
   BSTConstIterator operator++(int);
 
@@ -63,34 +61,25 @@ public:
   bool operator!=(const BSTConstIterator& other) const;
 
   const BSTNode<Key, Value>* getNode() const;
+
+private:
+  const BSTNode<Key, Value>* node_;
 };
 
-template<class Key, class Value, class Compare = std::less<Key>>
+template<class Key, class Value, class Compare = std::less<Key> >
 class BSTree {
-private:
-  BSTNode<Key, Value>* root;
-  Compare comp;
-  size_t treeSize;
-
-  BSTNode<Key, Value>* findNode(const Key& k) const;
-  BSTNode<Key, Value>* getMinimum(BSTNode<Key, Value>* node) const;
-  BSTNode<Key, Value>* getMaximum(BSTNode<Key, Value>* node) const;
-  size_t computeHeight(BSTNode<Key, Value>* node) const;
-  void deleteSubtree(BSTNode<Key, Value>* node);
-  BSTNode<Key, Value>* copySubtree(BSTNode<Key, Value>* node, BSTNode<Key, Value>* parent);
-
 public:
+  using iterator = BSTIterator<Key, Value>;
+  using const_iterator = BSTConstIterator<Key, Value>;
+
   BSTree();
   BSTree(const BSTree& other);
   BSTree& operator=(const BSTree& other);
   ~BSTree();
 
-  void push(Key k, Value v);
-  Value get(Key k);
-  Value drop(Key k);
-
-  using iterator = BSTIterator<Key, Value>;
-  using const_iterator = BSTConstIterator<Key, Value>;
+  void push(const Key& k, const Value& v);
+  Value get(const Key& k);
+  Value drop(const Key& k);
 
   iterator begin();
   const_iterator begin() const;
@@ -105,12 +94,28 @@ public:
   const_iterator rotateLargeLeft(const_iterator it);
   const_iterator rotateLargeRight(const_iterator it);
 
-  size_t height(const_iterator it);
-  size_t height();
+  size_t height(const_iterator it) const;
+  size_t height() const;
 
   size_t size() const;
   bool empty() const;
   void clear();
+
+private:
+  BSTNode<Key, Value>* fake_root_;
+  Compare comp_;
+  size_t size_;
+
+  BSTNode<Key, Value>* findNode(const Key& k) const;
+  BSTNode<Key, Value>* getMinimum(BSTNode<Key, Value>* node) const;
+  BSTNode<Key, Value>* getMaximum(BSTNode<Key, Value>* node) const;
+  size_t computeHeight(BSTNode<Key, Value>* node) const;
+  void deleteSubtree(BSTNode<Key, Value>* node);
+  BSTNode<Key, Value>* copySubtree(BSTNode<Key, Value>* node, BSTNode<Key, Value>* parent);
 };
+
+}
+
+#include "bstree.cpp"
 
 #endif
