@@ -51,7 +51,7 @@ class BSTConstIterator {
 public:
   BSTConstIterator();
   explicit BSTConstIterator(const BSTNode<Key, Value>* node);
-  explicit BSTConstIterator(const BSTIterator<Key, Value>& it);
+  BSTConstIterator(const BSTIterator<Key, Value>& it);
 
   std::pair<const Key&, const Value&> operator*() const;
   BSTConstIterator& operator++();

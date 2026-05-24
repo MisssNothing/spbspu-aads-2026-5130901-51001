@@ -31,11 +31,14 @@ BSTIterator<Key, Value>& BSTIterator<Key, Value>::operator++() {
     }
   } else {
     BSTNode<Key, Value>* parent = node_->parent_;
-    while (parent != parent->parent_ && node_ == parent->right_) {
+    while (parent != nullptr && parent->parent_ != parent && node_ == parent->right_) {
       node_ = parent;
       parent = parent->parent_;
     }
     node_ = parent;
+    if (node_ && node_->parent_ == node_) {
+      node_ = nullptr;
+    }
   }
   return *this;
 }
@@ -94,11 +97,14 @@ BSTConstIterator<Key, Value>& BSTConstIterator<Key, Value>::operator++() {
     }
   } else {
     const BSTNode<Key, Value>* parent = node_->parent_;
-    while (parent != parent->parent_ && node_ == parent->right_) {
+    while (parent != nullptr && parent->parent_ != parent && node_ == parent->right_) {
       node_ = parent;
       parent = parent->parent_;
     }
     node_ = parent;
+    if (node_ && node_->parent_ == node_) {
+      node_ = nullptr;
+    }
   }
   return *this;
 }
@@ -184,7 +190,7 @@ BSTNode<Key, Value>* BSTree<Key, Value, Compare>::copySubtree(
 
 template<class Key, class Value, class Compare>
 void BSTree<Key, Value, Compare>::deleteSubtree(BSTNode<Key, Value>* node) {
-  if (!node) {
+  if (!node || node == fake_root_) {
     return;
   }
   deleteSubtree(node->left_);
@@ -195,7 +201,7 @@ void BSTree<Key, Value, Compare>::deleteSubtree(BSTNode<Key, Value>* node) {
 template<class Key, class Value, class Compare>
 BSTNode<Key, Value>* BSTree<Key, Value, Compare>::findNode(const Key& k) const {
   BSTNode<Key, Value>* current = fake_root_->left_;
-  while (current) {
+  while (current && current != fake_root_) {
     if (comp_(k, current->key_)) {
       current = current->left_;
     } else if (comp_(current->key_, k)) {
@@ -209,10 +215,10 @@ BSTNode<Key, Value>* BSTree<Key, Value, Compare>::findNode(const Key& k) const {
 
 template<class Key, class Value, class Compare>
 BSTNode<Key, Value>* BSTree<Key, Value, Compare>::getMinimum(BSTNode<Key, Value>* node) const {
-  if (!node) {
+  if (!node || node == fake_root_) {
     return nullptr;
   }
-  while (node->left_) {
+  while (node->left_ && node->left_ != fake_root_) {
     node = node->left_;
   }
   return node;
@@ -220,10 +226,10 @@ BSTNode<Key, Value>* BSTree<Key, Value, Compare>::getMinimum(BSTNode<Key, Value>
 
 template<class Key, class Value, class Compare>
 BSTNode<Key, Value>* BSTree<Key, Value, Compare>::getMaximum(BSTNode<Key, Value>* node) const {
-  if (!node) {
+  if (!node || node == fake_root_) {
     return nullptr;
   }
-  while (node->right_) {
+  while (node->right_ && node->right_ != fake_root_) {
     node = node->right_;
   }
   return node;
@@ -231,7 +237,7 @@ BSTNode<Key, Value>* BSTree<Key, Value, Compare>::getMaximum(BSTNode<Key, Value>
 
 template<class Key, class Value, class Compare>
 size_t BSTree<Key, Value, Compare>::computeHeight(BSTNode<Key, Value>* node) const {
-  if (!node) {
+  if (!node || node == fake_root_) {
     return 0;
   }
   size_t left_height = computeHeight(node->left_);
@@ -249,7 +255,7 @@ void BSTree<Key, Value, Compare>::push(const Key& k, const Value& v) {
   }
   BSTNode<Key, Value>* current = fake_root_->left_;
   BSTNode<Key, Value>* parent = nullptr;
-  while (current) {
+  while (current && current != fake_root_) {
     parent = current;
     if (comp_(k, current->key_)) {
       current = current->left_;
@@ -287,39 +293,49 @@ Value BSTree<Key, Value, Compare>::drop(const Key& k) {
   }
   Value result = node->value_;
   BSTNode<Key, Value>* parent = node->parent_;
-  bool is_left_child = (node == parent->left_);
+  bool is_left_child = (parent && parent != fake_root_ && node == parent->left_);
   if (!node->left_ && !node->right_) {
     if (is_left_child) {
       parent->left_ = nullptr;
-    } else {
+    } else if (parent && parent != fake_root_) {
       parent->right_ = nullptr;
+    } else if (parent == fake_root_) {
+      fake_root_->left_ = nullptr;
     }
     delete node;
   } else if (!node->left_) {
     if (is_left_child) {
       parent->left_ = node->right_;
-    } else {
+    } else if (parent && parent != fake_root_) {
       parent->right_ = node->right_;
+    } else if (parent == fake_root_) {
+      fake_root_->left_ = node->right_;
     }
-    node->right_->parent_ = parent;
+    if (node->right_) {
+      node->right_->parent_ = parent;
+    }
     delete node;
   } else if (!node->right_) {
     if (is_left_child) {
       parent->left_ = node->left_;
-    } else {
+    } else if (parent && parent != fake_root_) {
       parent->right_ = node->left_;
+    } else if (parent == fake_root_) {
+      fake_root_->left_ = node->left_;
     }
-    node->left_->parent_ = parent;
+    if (node->left_) {
+      node->left_->parent_ = parent;
+    }
     delete node;
   } else {
     BSTNode<Key, Value>* successor = getMinimum(node->right_);
     node->key_ = successor->key_;
     node->value_ = successor->value_;
     BSTNode<Key, Value>* succ_parent = successor->parent_;
-    bool is_succ_left = (successor == succ_parent->left_);
+    bool is_succ_left = (succ_parent && successor == succ_parent->left_);
     if (is_succ_left) {
       succ_parent->left_ = successor->right_;
-    } else {
+    } else if (succ_parent) {
       succ_parent->right_ = successor->right_;
     }
     if (successor->right_) {
@@ -333,12 +349,20 @@ Value BSTree<Key, Value, Compare>::drop(const Key& k) {
 
 template<class Key, class Value, class Compare>
 typename BSTree<Key, Value, Compare>::iterator BSTree<Key, Value, Compare>::begin() {
-  return iterator(getMinimum(fake_root_->left_));
+  BSTNode<Key, Value>* min = getMinimum(fake_root_->left_);
+  if (!min || min == fake_root_) {
+    return iterator(nullptr);
+  }
+  return iterator(min);
 }
 
 template<class Key, class Value, class Compare>
 typename BSTree<Key, Value, Compare>::const_iterator BSTree<Key, Value, Compare>::begin() const {
-  return const_iterator(getMinimum(fake_root_->left_));
+  const BSTNode<Key, Value>* min = getMinimum(fake_root_->left_);
+  if (!min || min == fake_root_) {
+    return const_iterator(nullptr);
+  }
+  return const_iterator(min);
 }
 
 template<class Key, class Value, class Compare>
@@ -364,7 +388,7 @@ typename BSTree<Key, Value, Compare>::const_iterator BSTree<Key, Value, Compare>
 template<class Key, class Value, class Compare>
 typename BSTree<Key, Value, Compare>::const_iterator BSTree<Key, Value, Compare>::rotateLeft(const_iterator it) {
   BSTNode<Key, Value>* node = const_cast<BSTNode<Key, Value>*>(it.getNode());
-  if (!node || !node->right_) {
+  if (!node || !node->right_ || node == fake_root_) {
     return it;
   }
   BSTNode<Key, Value>* parent = node->parent_;
@@ -376,10 +400,12 @@ typename BSTree<Key, Value, Compare>::const_iterator BSTree<Key, Value, Compare>
   right_child->left_ = node;
   right_child->parent_ = parent;
   node->parent_ = right_child;
-  if (node == parent->left_) {
+  if (parent && node == parent->left_) {
     parent->left_ = right_child;
-  } else {
+  } else if (parent && parent != fake_root_) {
     parent->right_ = right_child;
+  } else if (parent == fake_root_) {
+    fake_root_->left_ = right_child;
   }
   return const_iterator(right_child);
 }
@@ -387,7 +413,7 @@ typename BSTree<Key, Value, Compare>::const_iterator BSTree<Key, Value, Compare>
 template<class Key, class Value, class Compare>
 typename BSTree<Key, Value, Compare>::const_iterator BSTree<Key, Value, Compare>::rotateRight(const_iterator it) {
   BSTNode<Key, Value>* node = const_cast<BSTNode<Key, Value>*>(it.getNode());
-  if (!node || !node->left_) {
+  if (!node || !node->left_ || node == fake_root_) {
     return it;
   }
   BSTNode<Key, Value>* parent = node->parent_;
@@ -399,10 +425,12 @@ typename BSTree<Key, Value, Compare>::const_iterator BSTree<Key, Value, Compare>
   left_child->right_ = node;
   left_child->parent_ = parent;
   node->parent_ = left_child;
-  if (node == parent->left_) {
+  if (parent && node == parent->left_) {
     parent->left_ = left_child;
-  } else {
+  } else if (parent && parent != fake_root_) {
     parent->right_ = left_child;
+  } else if (parent == fake_root_) {
+    fake_root_->left_ = left_child;
   }
   return const_iterator(left_child);
 }
@@ -410,7 +438,7 @@ typename BSTree<Key, Value, Compare>::const_iterator BSTree<Key, Value, Compare>
 template<class Key, class Value, class Compare>
 typename BSTree<Key, Value, Compare>::const_iterator BSTree<Key, Value, Compare>::rotateLargeLeft(const_iterator it) {
   BSTNode<Key, Value>* node = const_cast<BSTNode<Key, Value>*>(it.getNode());
-  if (!node || !node->right_ || !node->right_->left_) {
+  if (!node || !node->right_ || !node->right_->left_ || node == fake_root_) {
     return it;
   }
   rotateRight(const_iterator(node->right_));
@@ -420,7 +448,7 @@ typename BSTree<Key, Value, Compare>::const_iterator BSTree<Key, Value, Compare>
 template<class Key, class Value, class Compare>
 typename BSTree<Key, Value, Compare>::const_iterator BSTree<Key, Value, Compare>::rotateLargeRight(const_iterator it) {
   BSTNode<Key, Value>* node = const_cast<BSTNode<Key, Value>*>(it.getNode());
-  if (!node || !node->left_ || !node->left_->right_) {
+  if (!node || !node->left_ || !node->left_->right_ || node == fake_root_) {
     return it;
   }
   rotateLeft(const_iterator(node->left_));
@@ -430,7 +458,7 @@ typename BSTree<Key, Value, Compare>::const_iterator BSTree<Key, Value, Compare>
 template<class Key, class Value, class Compare>
 size_t BSTree<Key, Value, Compare>::height(const_iterator it) const {
   const BSTNode<Key, Value>* node = it.getNode();
-  if (!node) {
+  if (!node || node == fake_root_) {
     return 0;
   }
   return computeHeight(const_cast<BSTNode<Key, Value>*>(node));
