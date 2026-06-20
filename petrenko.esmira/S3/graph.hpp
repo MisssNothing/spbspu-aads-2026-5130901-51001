@@ -132,7 +132,7 @@ public:
 
   bool removeEdge(const std::string& from, const std::string& to,
                   unsigned int weight) {
-    if (!hasEdge(from, to, weight)) {
+    if (!hasEdge(from, weight)) {
       return false;
     }
     bool out_ok = removeFromMap(outgoing_, from, weight);
