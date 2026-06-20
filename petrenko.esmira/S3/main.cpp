@@ -10,6 +10,7 @@
 namespace petrenko {
 
 HashTable<std::string, Graph*, std::hash<std::string>, std::equal_to<std::string> > graphs;
+bool has_data = false;
 
 Graph* getGraph(const std::string& name) {
   Graph* graph_ptr = nullptr;
@@ -21,7 +22,7 @@ Graph* getGraph(const std::string& name) {
 
 Graph* getOrCreateGraph(const std::string& name) {
   Graph* graph = getGraph(name);
-  if (graph == nullptr) {
+  if (graph == nullptr && has_data) {
     graph = new Graph(name);
     graphs.add(name, graph);
   }
@@ -29,7 +30,7 @@ Graph* getOrCreateGraph(const std::string& name) {
 }
 
 void printInvalid() {
-  std::cerr << "<INVALID COMMAND>" << std::endl;
+  std::cerr << "<INVALID COMMAND>" << "\n";
 }
 
 void handleGraphs() {
@@ -51,7 +52,7 @@ void handleGraphs() {
     }
   }
   for (size_t i = 0; i < graph_names.size(); ++i) {
-    std::cout << graph_names[i] << std::endl;
+    std::cout << graph_names[i] << "\n";
   }
 }
 
@@ -67,7 +68,7 @@ void handleVertexes(const std::vector<std::string>& tokens) {
   }
   std::vector<std::string> vertices = graph->getVertices();
   for (size_t i = 0; i < vertices.size(); ++i) {
-    std::cout << vertices[i] << std::endl;
+    std::cout << vertices[i] << "\n";
   }
 }
 
@@ -88,9 +89,11 @@ void handleOutbound(const std::vector<std::string>& tokens) {
   }
   std::vector<std::pair<std::string, unsigned int> > outbound;
   outbound = graph->getOutbound(vertex);
-  std::cout << vertex << " " << outbound.size() << std::endl;
+  if (outbound.empty()) {
+    return;
+  }
   for (size_t i = 0; i < outbound.size(); ++i) {
-    std::cout << outbound[i].first << " " << outbound[i].second << std::endl;
+    std::cout << outbound[i].first << " " << outbound[i].second << "\n";
   }
 }
 
@@ -111,9 +114,8 @@ void handleInbound(const std::vector<std::string>& tokens) {
   }
   std::vector<std::pair<std::string, unsigned int> > inbound;
   inbound = graph->getInbound(vertex);
-  std::cout << vertex << " " << inbound.size() << std::endl;
   for (size_t i = 0; i < inbound.size(); ++i) {
-    std::cout << inbound[i].first << " " << inbound[i].second << std::endl;
+    std::cout << inbound[i].first << " " << inbound[i].second << "\n";
   }
 }
 
@@ -279,9 +281,10 @@ void handleExtract(const std::vector<std::string>& tokens) {
 void loadGraphsFromFile(const std::string& filename) {
   std::ifstream file(filename.c_str());
   if (!file.is_open()) {
-    std::cerr << "Error: Cannot open file " << filename << std::endl;
+    std::cerr << "Error: Cannot open file " << filename << "\n";
     return;
   }
+  has_data = true;
   std::string line;
   while (std::getline(file, line)) {
     if (line.empty()) {
@@ -310,7 +313,12 @@ void loadGraphsFromFile(const std::string& filename) {
       std::string from, to;
       unsigned int weight;
       edge_iss >> from >> to >> weight;
-      graph->addEdge(from, to, weight);
+      if (from != to) {
+        graph->addEdge(from, to, weight);
+      } else {
+        graph->addVertices(std::vector<std::string>(1, from));
+        graph->addVertices(std::vector<std::string>(1, to));
+      }
     }
     graphs.add(graph_name, graph);
   }
@@ -373,7 +381,7 @@ void cleanup() {
 
 int main(int argc, char* argv[]) {
   if (argc != 2) {
-    std::cerr << "Usage: " << argv[0] << " filename" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " filename" << "\n";
     return 1;
   }
   petrenko::loadGraphsFromFile(argv[1]);

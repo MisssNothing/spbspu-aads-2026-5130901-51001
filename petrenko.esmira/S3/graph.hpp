@@ -11,13 +11,10 @@ namespace petrenko {
 class Graph {
 private:
   std::string name_;
-
   HashTable<std::string, std::vector<std::pair<std::string, unsigned int> >,
             std::hash<std::string>, std::equal_to<std::string> > outgoing_;
-
   HashTable<std::string, std::vector<std::pair<std::string, unsigned int> >,
             std::hash<std::string>, std::equal_to<std::string> > incoming_;
-
   std::vector<std::string> vertices_;
 
   bool hasVertexInVector(const std::string& vertex) const {
@@ -32,18 +29,6 @@ private:
   void addVertexToVector(const std::string& vertex) {
     if (!hasVertexInVector(vertex)) {
       vertices_.push_back(vertex);
-    }
-  }
-
-  void sortVector(std::vector<std::string>& vec) const {
-    for (size_t i = 0; i < vec.size(); ++i) {
-      for (size_t j = i + 1; j < vec.size(); ++j) {
-        if (vec[i] > vec[j]) {
-          std::string temp = vec[i];
-          vec[i] = vec[j];
-          vec[j] = temp;
-        }
-      }
     }
   }
 
@@ -101,7 +86,12 @@ private:
       edges[i] = edges[i + 1];
     }
     edges.pop_back();
-    map.add(vertex, edges);
+    if (edges.empty()) {
+      std::vector<std::pair<std::string, unsigned int> > dummy;
+      map.drop(vertex, dummy);
+    } else {
+      map.add(vertex, edges);
+    }
     return true;
   }
 
@@ -115,9 +105,6 @@ public:
 
   void addEdge(const std::string& from, const std::string& to,
                unsigned int weight) {
-    if (from == to) {
-      return;
-    }
     addVertexToVector(from);
     addVertexToVector(to);
     addToMap(outgoing_, from, to, weight);
