@@ -1,8 +1,8 @@
 #ifndef HASH_TABLE_HPP
 #define HASH_TABLE_HPP
 #include <iostream>
-#include <vector>
 #include <utility>
+#include <vector>
 
 namespace petrenko {
 
