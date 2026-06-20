@@ -204,7 +204,6 @@ public:
     table_.clear();
     table_.resize(slots);
 
-    size_t old_elements = num_elements_;
     num_elements_ = 0;
     num_tombstones_ = 0;
 

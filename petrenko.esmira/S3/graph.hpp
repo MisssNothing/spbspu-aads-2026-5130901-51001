@@ -190,7 +190,7 @@ public:
     return hasVertexInVector(vertex);
   }
 
-  bool hasEdge(const std::string& from, const std::string& to,
+  bool hasEdge(const std::string& from,
                unsigned int weight) const {
     std::vector<unsigned int> edges;
     if (!outgoing_.get(from, edges)) {
