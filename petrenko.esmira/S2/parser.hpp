@@ -33,22 +33,48 @@ namespace petrenko {
   }
 
   long long applyOperator(const std::string& op, long long a, long long b) {
-    if (op == "+") return a + b;
-    if (op == "-") return a - b;
-    if (op == "*") return a * b;
+    if (op == "+") {
+      if ((b > 0 && a > LLONG_MAX - b) || (b < 0 && a < LLONG_MIN - b)) {
+        throw std::runtime_error("Overflow");
+      }
+      return a + b;
+    }
+    if (op == "-") {
+      if ((b < 0 && a > LLONG_MAX + b) || (b > 0 && a < LLONG_MIN + b)) {
+        throw std::runtime_error("Overflow");
+      }
+      return a - b;
+    }
+    if (op == "*") {
+      if (a > 0 && b > 0 && a > LLONG_MAX / b) {
+        throw std::runtime_error("Overflow");
+      }
+      if (a > 0 && b < 0 && b < LLONG_MIN / a) {
+        throw std::runtime_error("Overflow");
+      }
+      if (a < 0 && b > 0 && a < LLONG_MIN / b) {
+        throw std::runtime_error("Overflow");
+      }
+      if (a < 0 && b < 0 && a < LLONG_MAX / b) {
+        throw std::runtime_error("Overflow");
+      }
+      return a * b;
+    }
     if (op == "/") {
       if (b == 0) throw std::runtime_error("Zero");
       return a / b;
     }
-
     if (op == "%") {
       if (b == 0) throw std::runtime_error("Zero");
-      return a % b;
+      long long result = a % b;
+      if (result < 0) {
+        result += (b > 0) ? b : -b;
+      }
+      return result;
     }
-
     if (op == "gcd") {
-      a = (a < 0) ? -1 * a : a;
-      b = (b < 0) ? -1 * b : b;
+      a = (a < 0) ? -a : a;
+      b = (b < 0) ? -b : b;
       long long temp;
       while (b != 0) {
         temp = b;
