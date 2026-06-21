@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(test_push_front_back) {
   BOOST_CHECK_EQUAL(q.size(), 3);
 }
 
-BOOST_AUTO_TEST_CASE(test_drop_fifo) {
+BOOST_AUTO_TEST_CASE(test_pop_fifo) {
   petrenko::Queue<int> q;
 
   q.push(1);
@@ -30,10 +30,10 @@ BOOST_AUTO_TEST_CASE(test_drop_fifo) {
   q.push(3);
   q.push(4);
 
-  BOOST_CHECK_EQUAL(q.drop(), 1);
-  BOOST_CHECK_EQUAL(q.drop(), 2);
-  BOOST_CHECK_EQUAL(q.drop(), 3);
-  BOOST_CHECK_EQUAL(q.drop(), 4);
+  BOOST_CHECK_EQUAL(q.pop(), 1);
+  BOOST_CHECK_EQUAL(q.pop(), 2);
+  BOOST_CHECK_EQUAL(q.pop(), 3);
+  BOOST_CHECK_EQUAL(q.pop(), 4);
   BOOST_CHECK(q.empty());
 }
 
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(test_empty_queue) {
   q.push(42);
   BOOST_CHECK(!q.empty());
 
-  q.drop();
+  q.pop();
   BOOST_CHECK(q.empty());
 }
 
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_queue_size) {
   BOOST_CHECK_EQUAL(q.size(), 100);
 
   for (int i = 0; i < 50; ++i) {
-    q.drop();
+    q.pop();
   }
   BOOST_CHECK_EQUAL(q.size(), 50);
   BOOST_CHECK_EQUAL(q.front(), 50);
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_large_queue) {
   BOOST_CHECK_EQUAL(q.back(), N - 1);
 
   for (int i = 0; i < N; ++i) {
-    BOOST_CHECK_EQUAL(q.drop(), i);
+    BOOST_CHECK_EQUAL(q.pop(), i);
   }
 
   BOOST_CHECK(q.empty());
