@@ -53,4 +53,3 @@ BOOST_AUTO_TEST_CASE(testByteHashFunction) {
 
   BOOST_CHECK_NE(hash, 0);
 }
-
