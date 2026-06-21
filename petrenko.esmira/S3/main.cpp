@@ -90,6 +90,7 @@ void handleOutbound(const std::vector<std::string>& tokens) {
   std::vector<std::pair<std::string, unsigned int> > outbound;
   outbound = graph->getOutbound(vertex);
   if (outbound.empty()) {
+    std::cout << "\n";
     return;
   }
   for (size_t i = 0; i < outbound.size(); ++i) {
