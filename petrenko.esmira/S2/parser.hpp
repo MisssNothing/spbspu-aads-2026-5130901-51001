@@ -3,7 +3,6 @@
 #include <string>
 #include "stack.hpp"
 #include "queue.hpp"
-#include "parser.cpp"
 
 namespace petrenko {
   int getPrecedence(const std::string& op);
