@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE ParserTests
+/*#define BOOST_TEST_MODULE ParserTests*/
 #include <boost/test/included/unit_test.hpp>
 #include "parser.hpp"
 #include <string>

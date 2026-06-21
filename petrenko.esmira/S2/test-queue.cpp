@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE OueueTest
+/*#define BOOST_TEST_MODULE OueueTest*/
 #include <boost/test/included/unit_test.hpp>
 #include "queue.hpp"
 #include <string>
