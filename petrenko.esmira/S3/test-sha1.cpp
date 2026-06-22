@@ -1,4 +1,3 @@
-#define BOOST_TEST_MODULE SHA1Tests
 #include <boost/test/included/unit_test.hpp>
 #include "sha1.hpp"
 #include <string>

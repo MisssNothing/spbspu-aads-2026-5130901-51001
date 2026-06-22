@@ -1,4 +1,3 @@
-#define BOOST_TEST_MODULE GraphTests
 #include <boost/test/included/unit_test.hpp>
 #include "graph.hpp"
 #include <string>
