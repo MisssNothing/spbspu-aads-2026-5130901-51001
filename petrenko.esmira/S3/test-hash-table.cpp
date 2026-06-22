@@ -155,15 +155,13 @@ BOOST_AUTO_TEST_CASE(testEmptyTable) {
 BOOST_AUTO_TEST_CASE(testManyElements) {
   petrenko::HashTable<std::string, int,
                       std::hash<std::string>,
-                      std::equal_to<std::string> > t(4);
-
+                      std::equal_to<std::string>> t(4);
+  t.rehash(200);
   for (int i = 0; i < 100; ++i) {
     std::string key = "key" + std::to_string(i);
     t.add(key, i);
   }
-
   BOOST_CHECK_EQUAL(t.size(), 100);
-
   for (int i = 0; i < 100; ++i) {
     std::string key = "key" + std::to_string(i);
     BOOST_CHECK(t.has(key));
