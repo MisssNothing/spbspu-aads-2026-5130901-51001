@@ -28,11 +28,17 @@ void printInvalid() {
 
 void handleGraphs() {
   std::vector<std::string> graph_names;
-  for (auto it = graphs.begin(); it != graphs.end(); ++it) {
+  for (HashTable<std::string, Graph*, std::hash<std::string>,
+                 std::equal_to<std::string>>::Iterator it = graphs.begin();
+       it != graphs.end(); ++it) {
     std::pair<std::string, Graph*> p = *it;
     graph_names.push_back(p.first);
   }
   std::sort(graph_names.begin(), graph_names.end());
+  if (graph_names.empty()) {
+    std::cout << "\n";
+    return;
+  }
   for (size_t i = 0; i < graph_names.size(); ++i) {
     std::cout << graph_names[i] << "\n";
   }
@@ -95,6 +101,10 @@ void handleVertexes(const std::vector<std::string>& tokens) {
   }
 
   std::vector<std::string> vertices = graph->getVertices();
+  if (vertices.empty()) {
+    std::cout << "\n";
+    return;
+  }
   for (size_t i = 0; i < vertices.size(); ++i) {
     std::cout << vertices[i] << "\n";
   }
@@ -120,6 +130,10 @@ void handleOutbound(const std::vector<std::string>& tokens) {
 
   std::vector<std::pair<std::string, unsigned int>> outbound =
       graph->getOutbound(vertex);
+  if (outbound.empty()) {
+    std::cout << "\n";
+    return;
+  }
   printGroupedEdges(outbound);
 }
 
@@ -143,6 +157,10 @@ void handleInbound(const std::vector<std::string>& tokens) {
 
   std::vector<std::pair<std::string, unsigned int>> inbound =
       graph->getInbound(vertex);
+  if (inbound.empty()) {
+    std::cout << "\n";
+    return;
+  }
   printGroupedEdges(inbound);
 }
 
@@ -441,7 +459,9 @@ void runInteractive() {
 }
 
 void cleanup() {
-  for (auto it = graphs.begin(); it != graphs.end(); ++it) {
+  for (HashTable<std::string, Graph*, std::hash<std::string>,
+                 std::equal_to<std::string>>::Iterator it = graphs.begin();
+       it != graphs.end(); ++it) {
     std::pair<std::string, Graph*> p = *it;
     delete p.second;
   }
