@@ -4,6 +4,7 @@
 #include "hash-table.hpp"
 #include <string>
 #include <vector>
+#include <utility>
 #include <algorithm>
 
 namespace petrenko {
