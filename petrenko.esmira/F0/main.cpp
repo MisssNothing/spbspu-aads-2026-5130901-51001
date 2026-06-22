@@ -13,5 +13,6 @@ int main()
     }
     dispatcher.processCommand(line);
   }
+
   return 0;
 }

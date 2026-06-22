@@ -371,7 +371,8 @@ public:
 
   void merge(const Dictionary& other)
   {
-    std::vector<std::pair<std::string, WordEntry>> otherWords = other.words_.toVector();
+    std::vector<std::pair<std::string, WordEntry>> otherWords =
+      other.words_.toVector();
 
     for (size_t i = 0; i < otherWords.size(); ++i)
     {

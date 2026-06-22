@@ -27,7 +27,8 @@ private:
   {
     int index = 0;
     for (LCIter<DictStorage> it = dictionaries_.cbegin();
-         it != dictionaries_.cend(); ++it)
+         it != dictionaries_.cend();
+         ++it)
     {
       if ((*it).name_ == name)
       {
@@ -53,7 +54,8 @@ private:
 
     int index = 0;
     for (LIter<DictStorage> it = dictionaries_.begin();
-         it != dictionaries_.end(); ++it)
+         it != dictionaries_.end();
+         ++it)
     {
       if (index == idx)
       {
@@ -74,7 +76,8 @@ private:
 
     int index = 0;
     for (LCIter<DictStorage> it = dictionaries_.cbegin();
-         it != dictionaries_.cend(); ++it)
+         it != dictionaries_.cend();
+         ++it)
     {
       if (index == idx)
       {
@@ -185,13 +188,14 @@ public:
           PosNode* unknownNode = existingEntry.findPos("unknown");
           if (unknownNode && unknownNode->translations_)
           {
-            getDictionary(dictName).removeTranslation(word, "(требуется перевод)", "unknown");
+            getDictionary(dictName).removeTranslation(
+              word, "(требуется перевод)", "unknown");
           }
         }
 
         getDictionary(dictName).addTranslation(word, translation, pos);
         std::cout << "OK: добавлен перевод " << word << " (" << pos
-                << ") -> " << translation << '\n';
+                  << ") -> " << translation << '\n';
       }
       else if (cmd == "removeTranslation")
       {
@@ -264,7 +268,8 @@ public:
         else
         {
           std::cout << dictName << ":" << '\n';
-          std::vector<std::string> words = getDictionaryConst(dictName).getAllWords();
+          std::vector<std::string> words =
+            getDictionaryConst(dictName).getAllWords();
 
           for (size_t i = 0; i < words.size(); ++i)
           {
@@ -309,7 +314,8 @@ public:
         }
 
         std::cout << pos << ":" << '\n';
-        std::vector<std::string> words = getDictionaryConst(dictName).findWordsByPos(pos);
+        std::vector<std::string> words =
+          getDictionaryConst(dictName).findWordsByPos(pos);
 
         for (size_t i = 0; i < words.size(); ++i)
         {
@@ -431,9 +437,12 @@ public:
         std::string inputFile, sourceDict, outputFile, unknownDict;
         ss >> inputFile >> sourceDict >> outputFile >> unknownDict;
 
-        if (inputFile.empty() || sourceDict.empty() || outputFile.empty() || unknownDict.empty())
+        if (inputFile.empty() || sourceDict.empty() ||
+            outputFile.empty() || unknownDict.empty())
         {
-          throw std::string("Сигнатура: exportTranslation <input-file> <source-dict> <output-file> <unknown-dict>");
+          throw std::string("Сигнатура: exportTranslation "
+                            "<input-file> <source-dict> "
+                            "<output-file> <unknown-dict>");
         }
 
         if (!dictExists(sourceDict))
@@ -490,7 +499,8 @@ public:
             }
 
             std::string lowerWord = toLowercase(cleanWord);
-            WordEntry entry = getDictionaryConst(sourceDict).getWordEntry(lowerWord);
+            WordEntry entry =
+              getDictionaryConst(sourceDict).getWordEntry(lowerWord);
 
             if (entry.hasTranslations())
             {
@@ -528,7 +538,8 @@ public:
               if (!alreadyAdded)
               {
                 unknownWordsList.push_back(englishWord);
-                getDictionary(unknownDict).addTranslation(englishWord, "(требуется перевод)", "unknown");
+                getDictionary(unknownDict).addTranslation(
+                  englishWord, "(требуется перевод)", "unknown");
               }
 
               if (!firstWord)
@@ -573,7 +584,8 @@ public:
         createDictionary(newDict);
         Dictionary& target = getDictionary(newDict);
 
-        std::vector<std::string> words1 = getDictionaryConst(dict1).getAllWords();
+        std::vector<std::string> words1 =
+          getDictionaryConst(dict1).getAllWords();
 
         for (size_t i = 0; i < words1.size(); ++i)
         {
@@ -618,7 +630,8 @@ public:
         createDictionary(newDict);
         Dictionary& target = getDictionary(newDict);
 
-        std::vector<std::string> words1 = getDictionaryConst(dict1).getAllWords();
+        std::vector<std::string> words1 =
+          getDictionaryConst(dict1).getAllWords();
 
         for (size_t i = 0; i < words1.size(); ++i)
         {
@@ -643,7 +656,8 @@ public:
           }
         }
 
-        std::vector<std::string> words2 = getDictionaryConst(dict2).getAllWords();
+        std::vector<std::string> words2 =
+          getDictionaryConst(dict2).getAllWords();
 
         for (size_t i = 0; i < words2.size(); ++i)
         {
@@ -667,7 +681,6 @@ public:
             }
           }
         }
-
         std::cout << "OK: словарь " << newDict << " создан" << '\n';
       }
       else

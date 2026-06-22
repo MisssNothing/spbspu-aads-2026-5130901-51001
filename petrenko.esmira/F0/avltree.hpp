@@ -34,19 +34,29 @@ private:
 
   int getHeight(Node* node) const
   {
-    return node ? node->height_ : 0;
+    if (node)
+    {
+      return node->height_;
+    }
+    return 0;
   }
 
   int getBalanceFactor(Node* node) const
   {
-    return node ? getHeight(node->left_) - getHeight(node->right_) : 0;
+    if (node)
+    {
+      return getHeight(node->left_) - getHeight(node->right_);
+    }
+    return 0;
   }
 
   void updateHeight(Node* node)
   {
     if (node)
     {
-      node->height_ = 1 + std::max(getHeight(node->left_), getHeight(node->right_));
+      int leftHeight = getHeight(node->left_);
+      int rightHeight = getHeight(node->right_);
+      node->height_ = 1 + std::max(leftHeight, rightHeight);
     }
   }
 
@@ -86,9 +96,9 @@ private:
     }
 
     updateHeight(node);
-    int bf = getBalanceFactor(node);
+    int balanceFactor = getBalanceFactor(node);
 
-    if (bf > 1)
+    if (balanceFactor > 1)
     {
       if (getBalanceFactor(node->left_) < 0)
       {
@@ -97,7 +107,7 @@ private:
       return rotateRight(node);
     }
 
-    if (bf < -1)
+    if (balanceFactor < -1)
     {
       if (getBalanceFactor(node->right_) > 0)
       {
