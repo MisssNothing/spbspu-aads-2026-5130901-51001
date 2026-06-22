@@ -1,5 +1,4 @@
-#define BOOST_TEST_MODULE DictionaryManagerTests
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include "dictmanager.hpp"
 
 BOOST_AUTO_TEST_SUITE(DictionaryManagerTests)
