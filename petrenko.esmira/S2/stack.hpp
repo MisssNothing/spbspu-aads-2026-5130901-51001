@@ -1,7 +1,7 @@
 #ifndef STACK_HPP
 #define STACK_HPP
 
-#include "../S1/list.hpp"
+#include "../common/list.hpp"
 
 namespace petrenko {
   template<class T>

@@ -1,6 +1,6 @@
 #ifndef QUEUE_HPP
 #define QUEUE_HPP
-#include "../S1/list.hpp"
+#include "../common/list.hpp"
 
 namespace petrenko {
   template< class T >
