@@ -1,9 +1,9 @@
 #ifndef HASH_TABLE_HPP
 #define HASH_TABLE_HPP
 
-#include <iostream>
 #include <vector>
 #include <utility>
+#include <stdexcept>
 
 namespace petrenko {
 
@@ -83,13 +83,6 @@ private:
     return table_.size();
   }
 
-  double loadFactor() const {
-    if (table_.empty()) {
-      return 1.0;
-    }
-    return static_cast<double>(num_elements_ + num_tombstones_) / table_.size();
-  }
-
 public:
   class Iterator {
   private:
@@ -98,7 +91,6 @@ public:
   public:
     Iterator(const HashTable* table, size_t index)
       : table_(table), index_(index) {}
-
     Iterator& operator++() {
       do {
         ++index_;
@@ -106,11 +98,9 @@ public:
                table_->table_[index_].state_ != BucketState::OCCUPIED);
       return *this;
     }
-
     std::pair<Key, Value> operator*() const {
       return {table_->table_[index_].key_, table_->table_[index_].value_};
     }
-
     bool operator!=(const Iterator& other) const {
       return index_ != other.index_;
     }
@@ -125,16 +115,9 @@ public:
   }
 
   void add(const Key& key, const Value& value) {
-    while (num_elements_ > table_.size() / 2) {
-      rehash(table_.size() * 2);
-    }
     size_t idx = findIndex(key);
     if (idx == table_.size()) {
-      rehash(table_.size() * 2);
-      idx = findIndex(key);
-      if (idx == table_.size()) {
-        return;
-      }
+      throw std::runtime_error("Hash table is full");
     }
     size_t existing_idx = findExistingIndex(key);
     if (existing_idx != table_.size()) {
@@ -214,15 +197,18 @@ public:
     num_elements_ = 0;
     num_tombstones_ = 0;
     for (size_t i = 0; i < old_table.size(); ++i) {
-      Bucket& bucket = old_table[i];
-      if (bucket.state_ == BucketState::OCCUPIED) {
-        size_t idx = findIndex(bucket.key_);
+      if (old_table[i].state_ == BucketState::OCCUPIED) {
+        size_t idx = findIndex(old_table[i].key_);
         if (idx != table_.size()) {
-          table_[idx] = std::move(bucket);
+          table_[idx] = std::move(old_table[i]);
           num_elements_++;
         }
       }
     }
+  }
+
+  size_t tombstoneCount() const {
+    return num_tombstones_;
   }
 
   Iterator begin() const {
@@ -244,10 +230,6 @@ public:
 
   size_t capacity() const {
     return table_.size();
-  }
-
-  size_t tombstoneCount() const {
-    return num_tombstones_;
   }
 };
 

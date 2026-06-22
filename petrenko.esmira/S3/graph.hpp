@@ -4,17 +4,17 @@
 #include "hash-table.hpp"
 #include <string>
 #include <vector>
-#include <utility>
+#include <algorithm>
 
 namespace petrenko {
 
 class Graph {
 private:
   std::string name_;
-  HashTable<std::string, std::vector<std::pair<std::string, unsigned int> >,
-            std::hash<std::string>, std::equal_to<std::string> > outgoing_;
-  HashTable<std::string, std::vector<std::pair<std::string, unsigned int> >,
-            std::hash<std::string>, std::equal_to<std::string> > incoming_;
+  HashTable<std::string, std::vector<std::pair<std::string, unsigned int>>,
+            std::hash<std::string>, std::equal_to<std::string>> outgoing_;
+  HashTable<std::string, std::vector<std::pair<std::string, unsigned int>>,
+            std::hash<std::string>, std::equal_to<std::string>> incoming_;
   std::vector<std::string> vertices_;
 
   bool hasVertexInVector(const std::string& vertex) const {
@@ -32,41 +32,33 @@ private:
     }
   }
 
-  void sortEdges(std::vector<std::pair<std::string, unsigned int> >& edges) const {
-    for (size_t i = 0; i < edges.size(); ++i) {
-      for (size_t j = i + 1; j < edges.size(); ++j) {
-        if (edges[i].first > edges[j].first ||
-            (edges[i].first == edges[j].first &&
-             edges[i].second > edges[j].second)) {
-          std::swap(edges[i], edges[j]);
-        }
-      }
-    }
+  void sortEdges(std::vector<std::pair<std::string, unsigned int>>& edges) const {
+    std::sort(edges.begin(), edges.end());
   }
 
   void addToMap(
-      HashTable<std::string, std::vector<std::pair<std::string, unsigned int> >,
-                std::hash<std::string>, std::equal_to<std::string> >& map,
+      HashTable<std::string, std::vector<std::pair<std::string, unsigned int>>,
+                std::hash<std::string>, std::equal_to<std::string>>& map,
       const std::string& vertex, const std::string& to_vertex,
       unsigned int weight) {
-    std::vector<std::pair<std::string, unsigned int> > edges;
+    std::vector<std::pair<std::string, unsigned int>> edges;
     if (map.get(vertex, edges)) {
       edges.push_back(std::make_pair(to_vertex, weight));
       sortEdges(edges);
       map.add(vertex, edges);
     } else {
-      std::vector<std::pair<std::string, unsigned int> > new_edges;
+      std::vector<std::pair<std::string, unsigned int>> new_edges;
       new_edges.push_back(std::make_pair(to_vertex, weight));
       map.add(vertex, new_edges);
     }
   }
 
   bool removeFromMap(
-      HashTable<std::string, std::vector<std::pair<std::string, unsigned int> >,
-                std::hash<std::string>, std::equal_to<std::string> >& map,
+      HashTable<std::string, std::vector<std::pair<std::string, unsigned int>>,
+                std::hash<std::string>, std::equal_to<std::string>>& map,
       const std::string& vertex, const std::string& to_vertex,
       unsigned int weight) {
-    std::vector<std::pair<std::string, unsigned int> > edges;
+    std::vector<std::pair<std::string, unsigned int>> edges;
     if (!map.get(vertex, edges)) {
       return false;
     }
@@ -87,7 +79,7 @@ private:
     }
     edges.pop_back();
     if (edges.empty()) {
-      std::vector<std::pair<std::string, unsigned int> > dummy;
+      std::vector<std::pair<std::string, unsigned int>> dummy;
       map.drop(vertex, dummy);
     } else {
       map.add(vertex, edges);
@@ -123,38 +115,30 @@ public:
 
   std::vector<std::string> getVertices() const {
     std::vector<std::string> result = vertices_;
-    for (size_t i = 0; i < result.size(); ++i) {
-      for (size_t j = i + 1; j < result.size(); ++j) {
-        if (result[i] > result[j]) {
-          std::string temp = result[i];
-          result[i] = result[j];
-          result[j] = temp;
-        }
-      }
-    }
+    std::sort(result.begin(), result.end());
     return result;
   }
 
-  std::vector<std::pair<std::string, unsigned int> >
+  std::vector<std::pair<std::string, unsigned int>>
   getOutbound(const std::string& vertex) const {
-    std::vector<std::pair<std::string, unsigned int> > result;
+    std::vector<std::pair<std::string, unsigned int>> result;
     if (!hasVertexInVector(vertex)) {
       return result;
     }
-    std::vector<std::pair<std::string, unsigned int> > edges;
+    std::vector<std::pair<std::string, unsigned int>> edges;
     if (outgoing_.get(vertex, edges)) {
       result = edges;
     }
     return result;
   }
 
-  std::vector<std::pair<std::string, unsigned int> >
+  std::vector<std::pair<std::string, unsigned int>>
   getInbound(const std::string& vertex) const {
-    std::vector<std::pair<std::string, unsigned int> > result;
+    std::vector<std::pair<std::string, unsigned int>> result;
     if (!hasVertexInVector(vertex)) {
       return result;
     }
-    std::vector<std::pair<std::string, unsigned int> > edges;
+    std::vector<std::pair<std::string, unsigned int>> edges;
     if (incoming_.get(vertex, edges)) {
       result = edges;
     }
@@ -167,7 +151,7 @@ public:
 
   bool hasEdge(const std::string& from, const std::string& to,
                unsigned int weight) const {
-    std::vector<std::pair<std::string, unsigned int> > edges;
+    std::vector<std::pair<std::string, unsigned int>> edges;
     if (!outgoing_.get(from, edges)) {
       return false;
     }

@@ -5,12 +5,11 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <cstdlib>
+#include <vector>
 
 namespace petrenko {
 
-HashTable<std::string, Graph*, std::hash<std::string>, std::equal_to<std::string> > graphs;
-bool has_data = false;
+HashTable<std::string, Graph*, std::hash<std::string>, std::equal_to<std::string>> graphs;
 
 Graph* getGraph(const std::string& name) {
   Graph* graph_ptr = nullptr;
@@ -20,37 +19,17 @@ Graph* getGraph(const std::string& name) {
   return graph_ptr;
 }
 
-Graph* getOrCreateGraph(const std::string& name) {
-  Graph* graph = getGraph(name);
-  if (graph == nullptr && has_data) {
-    graph = new Graph(name);
-    graphs.add(name, graph);
-  }
-  return graph;
-}
-
 void printInvalid() {
   std::cerr << "<INVALID COMMAND>" << "\n";
 }
 
 void handleGraphs() {
   std::vector<std::string> graph_names;
-  for (HashTable<std::string, Graph*,
-                 std::hash<std::string>,
-                 std::equal_to<std::string> >::Iterator it = graphs.begin();
-       it != graphs.end(); ++it) {
+  for (auto it = graphs.begin(); it != graphs.end(); ++it) {
     std::pair<std::string, Graph*> p = *it;
     graph_names.push_back(p.first);
   }
-  for (size_t i = 0; i < graph_names.size(); ++i) {
-    for (size_t j = i + 1; j < graph_names.size(); ++j) {
-      if (graph_names[i] > graph_names[j]) {
-        std::string temp = graph_names[i];
-        graph_names[i] = graph_names[j];
-        graph_names[j] = temp;
-      }
-    }
-  }
+  std::sort(graph_names.begin(), graph_names.end());
   for (size_t i = 0; i < graph_names.size(); ++i) {
     std::cout << graph_names[i] << "\n";
   }
@@ -61,7 +40,7 @@ void handleVertexes(const std::vector<std::string>& tokens) {
     printInvalid();
     return;
   }
-  Graph* graph = getOrCreateGraph(tokens[1]);
+  Graph* graph = getGraph(tokens[1]);
   if (graph == nullptr) {
     printInvalid();
     return;
@@ -77,7 +56,7 @@ void handleOutbound(const std::vector<std::string>& tokens) {
     printInvalid();
     return;
   }
-  Graph* graph = getOrCreateGraph(tokens[1]);
+  Graph* graph = getGraph(tokens[1]);
   if (graph == nullptr) {
     printInvalid();
     return;
@@ -87,12 +66,8 @@ void handleOutbound(const std::vector<std::string>& tokens) {
     printInvalid();
     return;
   }
-  std::vector<std::pair<std::string, unsigned int> > outbound;
-  outbound = graph->getOutbound(vertex);
-  if (outbound.empty()) {
-    std::cout << "\n";
-    return;
-  }
+  std::vector<std::pair<std::string, unsigned int>> outbound =
+      graph->getOutbound(vertex);
   for (size_t i = 0; i < outbound.size(); ++i) {
     std::cout << outbound[i].first << " " << outbound[i].second << "\n";
   }
@@ -103,7 +78,7 @@ void handleInbound(const std::vector<std::string>& tokens) {
     printInvalid();
     return;
   }
-  Graph* graph = getOrCreateGraph(tokens[1]);
+  Graph* graph = getGraph(tokens[1]);
   if (graph == nullptr) {
     printInvalid();
     return;
@@ -113,8 +88,8 @@ void handleInbound(const std::vector<std::string>& tokens) {
     printInvalid();
     return;
   }
-  std::vector<std::pair<std::string, unsigned int> > inbound;
-  inbound = graph->getInbound(vertex);
+  std::vector<std::pair<std::string, unsigned int>> inbound =
+      graph->getInbound(vertex);
   for (size_t i = 0; i < inbound.size(); ++i) {
     std::cout << inbound[i].first << " " << inbound[i].second << "\n";
   }
@@ -125,7 +100,7 @@ void handleBind(const std::vector<std::string>& tokens) {
     printInvalid();
     return;
   }
-  Graph* graph = getOrCreateGraph(tokens[1]);
+  Graph* graph = getGraph(tokens[1]);
   if (graph == nullptr) {
     printInvalid();
     return;
@@ -147,7 +122,7 @@ void handleCut(const std::vector<std::string>& tokens) {
     printInvalid();
     return;
   }
-  Graph* graph = getOrCreateGraph(tokens[1]);
+  Graph* graph = getGraph(tokens[1]);
   if (graph == nullptr) {
     printInvalid();
     return;
@@ -215,14 +190,14 @@ void handleMerge(const std::vector<std::string>& tokens) {
   std::vector<std::string> verts2 = g2->getVertices();
   new_graph->addVertices(verts2);
   for (size_t i = 0; i < verts1.size(); ++i) {
-    std::vector<std::pair<std::string, unsigned int> > edges =
+    std::vector<std::pair<std::string, unsigned int>> edges =
         g1->getOutbound(verts1[i]);
     for (size_t j = 0; j < edges.size(); ++j) {
       new_graph->addEdge(verts1[i], edges[j].first, edges[j].second);
     }
   }
   for (size_t i = 0; i < verts2.size(); ++i) {
-    std::vector<std::pair<std::string, unsigned int> > edges =
+    std::vector<std::pair<std::string, unsigned int>> edges =
         g2->getOutbound(verts2[i]);
     for (size_t j = 0; j < edges.size(); ++j) {
       new_graph->addEdge(verts2[i], edges[j].first, edges[j].second);
@@ -263,7 +238,7 @@ void handleExtract(const std::vector<std::string>& tokens) {
   Graph* new_graph = new Graph(new_name);
   new_graph->addVertices(vertices_to_extract);
   for (size_t i = 0; i < vertices_to_extract.size(); ++i) {
-    std::vector<std::pair<std::string, unsigned int> > outbound =
+    std::vector<std::pair<std::string, unsigned int>> outbound =
         old_graph->getOutbound(vertices_to_extract[i]);
     for (size_t j = 0; j < outbound.size(); ++j) {
       for (size_t k = 0; k < vertices_to_extract.size(); ++k) {
@@ -285,7 +260,6 @@ void loadGraphsFromFile(const std::string& filename) {
     std::cerr << "Error: Cannot open file " << filename << "\n";
     return;
   }
-  has_data = true;
   std::string line;
   while (std::getline(file, line)) {
     if (line.empty()) {
@@ -294,7 +268,9 @@ void loadGraphsFromFile(const std::string& filename) {
     std::istringstream iss(line);
     std::string graph_name;
     int edge_count;
-    iss >> graph_name >> edge_count;
+    if (!(iss >> graph_name >> edge_count)) {
+      continue;
+    }
     if (graphs.has(graph_name)) {
       for (int i = 0; i < edge_count; ++i) {
         std::getline(file, line);
@@ -313,12 +289,8 @@ void loadGraphsFromFile(const std::string& filename) {
       std::istringstream edge_iss(line);
       std::string from, to;
       unsigned int weight;
-      edge_iss >> from >> to >> weight;
-      if (from != to) {
+      if (edge_iss >> from >> to >> weight) {
         graph->addEdge(from, to, weight);
-      } else {
-        graph->addVertices(std::vector<std::string>(1, from));
-        graph->addVertices(std::vector<std::string>(1, to));
       }
     }
     graphs.add(graph_name, graph);
@@ -369,10 +341,7 @@ void runInteractive() {
 }
 
 void cleanup() {
-  for (HashTable<std::string, Graph*,
-                 std::hash<std::string>,
-                 std::equal_to<std::string> >::Iterator it = graphs.begin();
-       it != graphs.end(); ++it) {
+  for (auto it = graphs.begin(); it != graphs.end(); ++it) {
     std::pair<std::string, Graph*> p = *it;
     delete p.second;
   }
